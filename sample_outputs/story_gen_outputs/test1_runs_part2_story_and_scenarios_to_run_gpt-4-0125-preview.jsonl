@@ -1,3 +1,3 @@
 {"seed_story": "potato_chip_food", "scenario_name": "food_item_in_grocery_store", "entities": "Person X = John\nObject Z = a jar of peanut butter", "entities_source": "gpt-4-0125-preview"}
-{"seed_story": "potato_chip_food", "scenario_name": "food_item_in_grocery_store", "entities": "Person X = Lisa\nObject Z = a package of strawberries", "entities_source": "gpt-4-0125-preview"}
-{"seed_story": "potato_chip_food", "scenario_name": "food_item_in_grocery_store", "entities": "Person X = Alex\nObject Z = a can of tuna", "entities_source": "gpt-4-0125-preview"}
+{"seed_story": "potato_chip_food", "scenario_name": "food_item_in_grocery_store", "entities": "Person X = Lisa\nObject Z = a pack of strawberries", "entities_source": "gpt-4-0125-preview"}
+{"seed_story": "potato_chip_food", "scenario_name": "food_item_in_grocery_store", "entities": "Person X = Alex\nObject Z = a can of soup", "entities_source": "gpt-4-0125-preview"}
