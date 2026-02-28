@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime
 
-from story_generation.utils import fill_template, process_output, make_prompt
+from story_generation.utils import process_output, make_prompt
 from inference.utils import (
     load_jsonl, save_jsonl, \
     llm_complete, llm_output_text, \
@@ -43,10 +43,6 @@ _parser.add_argument("--file-prefix", type=str, required=False, default="new", h
 
 output_dir: str = os.path.abspath(os.path.join(os.getcwd(), "sample_outputs/story_gen_outputs"))
 entity_keyinfo_template = "ENTITIES:\n{entities}\n\nKEY INFORMATION:\n{key_information}"
-
-# Add "scenario" field which describes the information asymmetry for second round of seed
-for k, v in SCENARIO_STORY_EXAMPLES_2.items():
-    v['scenario'] = SCENARIO_STORY_EXAMPLES[SCENARIO_NAMES_TO_STORY[v['scenario_name']]]['scenario']
 
 
 def process_sample_story(examples_dict, story, scenario, identifier):
@@ -175,7 +171,7 @@ def process_generated_stories(raw_stories_generated, exclude_seed=False):
         id_counter += 1
         try:
             stories_processed += process_output(output1, current_id)
-        except:
+        except Exception:
             missed.append((current_id, id_counter - 2))
             print(f"SKIPPING {current_id} DUE TO FAILED PROCESSING")
     print(f"Processed {len(stories_processed)} questions up to id_counter = {id_counter - 1}")
@@ -186,6 +182,11 @@ def process_generated_stories(raw_stories_generated, exclude_seed=False):
 def main():
     # parse command line arguments
     args = _parser.parse_args()
+
+    # Add "scenario" field which describes the information asymmetry for second round of seed stories
+    for k, v in SCENARIO_STORY_EXAMPLES_2.items():
+        v['scenario'] = SCENARIO_STORY_EXAMPLES[SCENARIO_NAMES_TO_STORY[v['scenario_name']]]['scenario']
+
     print(f"Entity brainstorming model(s) = {args.entity_models}")
     print(f"Story generation model(s) = {args.story_models}")
     print(f"Seed story round = {args.story_seed_round} (0 indicates use both available rounds)")
@@ -227,7 +228,7 @@ def main():
                                                                                   entities_brainstormed_res)
 
     if running_mode == "test":
-     story_and_scenarios_to_run_all = story_and_scenarios_to_run_all[:3]
+        story_and_scenarios_to_run_all = story_and_scenarios_to_run_all[:3]
     story_and_scenarios_file = entities_file.replace("1_entity_brainstorm", "2_story_and_scenarios_to_run")
     save_jsonl(story_and_scenarios_file, story_and_scenarios_to_run_all)
     print(f"SAVED story and scenarios to run to {story_and_scenarios_file}")

@@ -135,7 +135,8 @@ def main():
         prompts.append(prompt)
 
     print("-----Example prompts-----")
-    [print(p['prompt']+"\n-----\n")  for p in prompts[:3]]
+    for p in prompts[:3]:
+        print(p['prompt'] + "\n-----\n")
 
     # run model(s) and save output
     run_qa(args.models, prompts,f"_subset_{args.subset}_limit_{args.limit}_cot_{use_cot}".lower(), use_cot=use_cot)

@@ -4,7 +4,7 @@ from story_generation.prompts import SCENARIO_TEMPLATE, INSTRUCTIONS
 
 def llm_output_text(response):
     if not isinstance(response, dict):
-        response = response.dict()
+        response = response.model_dump()
     if 'content' in response: # Anthropic
         return response['content'][0]['text']
     if 'output' in response: # OpenAI responses

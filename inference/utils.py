@@ -1,4 +1,3 @@
-import openai
 import re
 import json
 import math
@@ -11,14 +10,14 @@ try:
     from openai import OpenAI
 
     OPENAI_CLIENT = OpenAI()
-except:
+except Exception:
     OPENAI_CLIENT = None
 
 try:
     import anthropic
 
     ANTHROPIC_CLIENT = anthropic.Anthropic()
-except:
+except Exception:
     print("Anthropic (Claude) client not available!")
     ANTHROPIC_CLIENT = None
 
@@ -26,7 +25,7 @@ try:
     from together import Together
 
     TOGETHER_CLIENT = Together()
-except:
+except Exception:
     print("Together client not available!")
     TOGETHER_CLIENT = None
 
@@ -52,10 +51,7 @@ def save_json(file_name, data):
 def chatgpt_complete(messages, model, options=None, client=None):
     client = client or OPENAI_CLIENT
     options = options or {}
-    if client is None:
-        res = openai.ChatCompletion.create(model=model, messages=messages, **options)
-    else:
-        res = client.chat.completions.create(model=model, messages=messages, **options)
+    res = client.chat.completions.create(model=model, messages=messages, **options)
     return res
 
 # migrate to use responses for gpt-5 and o-series models to get reasoning summary
@@ -65,10 +61,7 @@ def chatgpt_responses(messages, model, reasoning=None, options=None, client=None
 
     client = client or OPENAI_CLIENT
     options = options or {}
-    if client is None:
-        res = openai.responses.create(model=model, input=messages, reasoning=reasoning, **options)
-    else:
-        res = client.responses.create(model=model, input=messages, reasoning=reasoning, **options)
+    res = client.responses.create(model=model, input=messages, reasoning=reasoning, **options)
     return res
 
 def together_complete(messages, model, options=None, client=None):
@@ -104,7 +97,7 @@ def claude_complete(messages, model, options=None, client=None):
     return res
 
 def llm_complete(messages, model, options=None):
-    # TODO: Edit the logic here depending on desired models
+    # Routes to the correct API client based on model name. Add new model routing here.
     if 'claude' in model:
         return claude_complete(messages, model, options)
     elif 'gpt' in model:
@@ -117,7 +110,7 @@ def llm_complete(messages, model, options=None):
 
 def llm_output_text(response):
     if not isinstance(response, dict):
-        response = response.dict()
+        response = response.model_dump()
     if 'content' in response: # Anthropic
         return response['content'][0]['text']
     if 'output' in response: # OpenAI responses
@@ -172,7 +165,7 @@ def process_answer(data, answer_prefix="answer"):
     raw = data['llm_output']
     text = llm_output_text(raw)
     if not isinstance(raw, dict):
-        raw = raw.dict()
+        raw = raw.model_dump()
     text = re.sub(f"(?ims){answer_prefix}:?", "", text).strip()
     answer_index = None
     prob = 0
