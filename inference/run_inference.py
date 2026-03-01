@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import time
@@ -33,6 +34,12 @@ _parser.add_argument(
     default=False,
     help="Whether to ask the model to 'Think step by step' (True/False)"
 )
+_parser.add_argument(
+    "--output-tag",
+    type=str,
+    default="",
+    help="Optional string appended to output filename"
+)
 
 
 # SUBSETS OF SimpleToM
@@ -47,7 +54,10 @@ def run_qa(models: List[str], prompts_filtered, file_suffix, use_cot=False, clas
     for model in models:
         file_name = os.path.join(output_dir, f"simpletom_stories_{model.replace('/', '--')}{file_suffix}.jsonl")
         if os.path.exists(file_name):
-            raise ValueError(f"File {file_name} already exists!")
+            sys.exit(
+                f"Error: output file already exists:\n  {file_name}\n"
+                "Use --output-tag to change the filename."
+            )
 
     print(f"Running SimpleToM on {len(prompts_filtered)} prompts and {len(models)} model(s)")
     for model in models[:]:
@@ -99,6 +109,7 @@ def main():
     print(f"subset = {args.subset}")
     print(f"num instances limit (per subset) = {args.limit}")
     print(f"use cot = {args.use_cot}")
+    print(f"output file tag = {args.output_tag}")
 
     # load dataset
     # all subsets
@@ -139,7 +150,13 @@ def main():
         print(p['prompt'] + "\n-----\n")
 
     # run model(s) and save output
-    run_qa(args.models, prompts,f"_subset_{args.subset}_limit_{args.limit}_cot_{use_cot}".lower(), use_cot=use_cot)
+    file_suffix = f"_subset_{args.subset}_limit_{args.limit}_cot_{use_cot}"
+
+    if args.output_tag:
+        file_suffix += f"_{args.output_tag}"
+
+    file_suffix = file_suffix.lower()
+    run_qa(args.models, prompts, file_suffix, use_cot=use_cot)
 
 
 

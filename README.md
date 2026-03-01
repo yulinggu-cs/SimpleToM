@@ -103,17 +103,29 @@ Example commands
 ```commandline
 python inference/run_inference.py --models gpt-5-2025-08-07 --subset all --limit 2 --use-cot True
 ```
+If an output file for this command already exists in the output folder, the script will exit and you would see an error message like the following:
+```
+Error: output file already exists:
+  <Your_file_path>/SimpleToM/sample_outputs/inference_outputs/simpletom_stories_gpt-5-2025-08-07_subset_all_limit_2_cot_true.jsonl
+Use --output-tag to change the filename.
+```
+This behavior is intentional and prevents accidental overwriting of previously saved results. To save the output under a different name, provide the optional --output-tag argument with a tag of your choice, e.g.:
 
 ```commandline
-python inference/run_inference.py --models claude-3-haiku-20240307 --subset mental-state-qa --limit 2 --use-cot False
+ python inference/run_inference.py --models gpt-5-2025-08-07 --subset all --limit 2 --use-cot True --output-tag rerun1
+```
+
+
+```commandline
+python inference/run_inference.py --models claude-3-haiku-20240307 --subset mental-state-qa --limit 2 --use-cot False --output-tag rerun1
 ```
 
 ```commandline
-python inference/run_inference.py --models meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo claude-3-haiku-20240307 --subset mental-state-qa --limit 1
+python inference/run_inference.py --models meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo claude-3-haiku-20240307 --subset mental-state-qa --limit 1 --output-tag rerun1
 ```
 
 ```commandline
-python inference/run_inference.py --models gpt-5-2025-08-07 --subset mental-state-qa
+python inference/run_inference.py --models gpt-5-2025-08-07 --subset mental-state-qa --output-tag rerun1
 ```
 
 Note that only the `--models` argument is required. Other arguments are optional, when not set `--subset` defaults to `all`, `--limit` defaults to `None` and `--use-cot` defaults to `False`.

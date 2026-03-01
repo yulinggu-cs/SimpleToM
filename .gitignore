@@ -19,9 +19,6 @@ dist/
 build/
 *.egg-info/
 
-# Generated output files
-sample_outputs/inference_outputs/
-
 # OS
 .DS_Store
 Thumbs.db
