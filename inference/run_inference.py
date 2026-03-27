@@ -9,7 +9,7 @@ from typing import List
 from datasets import load_dataset
 
 from utils import (
-    save_jsonl,
+    save_jsonl, load_jsonl,
     llm_complete, llm_output_text, process_answer,\
     basic_stats,\
     question_prompt)
@@ -51,23 +51,27 @@ output_dir: str = os.path.abspath(os.path.join(os.getcwd(), "sample_outputs/infe
 
 
 def run_qa(models: List[str], prompts_filtered, file_suffix, use_cot=False, classify_prompt=None):
-    for model in models:
-        file_name = os.path.join(output_dir, f"simpletom_stories_{model.replace('/', '--')}{file_suffix}.jsonl")
-        if os.path.exists(file_name):
-            sys.exit(
-                f"Error: output file already exists:\n  {file_name}\n"
-                "Use --output-tag to change the filename."
-            )
-
     print(f"Running SimpleToM on {len(prompts_filtered)} prompts and {len(models)} model(s)")
     for model in models[:]:
+        file_name = os.path.join(output_dir, f"simpletom_stories_{model.replace('/', '--')}{file_suffix}.jsonl")
+        
         all_res = []
+        processed_ids = set()
+        if os.path.exists(file_name):
+            print(f"Output file {file_name} already exists. Loading cached outputs...")
+            all_res = load_jsonl(file_name)
+            processed_ids = {x.get('id') for x in all_res if x.get('id') is not None}
+
         print(f"MODEL = {model}")
         p_counter = 0
         for prompt in prompts_filtered[:]:
             if p_counter % 50 == 0:
                 print(f"{datetime.now()} {p_counter}/{len(prompts_filtered)}")
             p_counter += 1
+
+            if prompt.get('id') in processed_ids:
+                continue
+
             llm_output = None
             counter = 10
             max_tokens = 500 if use_cot else 20
@@ -83,21 +87,21 @@ def run_qa(models: List[str], prompts_filtered, file_suffix, use_cot=False, clas
                     time.sleep(10)
                     counter -= 1
             prompt['llm_output'] = llm_output.model_dump()
-            all_res.append(prompt)
-        file_name = os.path.join(output_dir, f"simpletom_stories_{model.replace('/', '--')}{file_suffix}.jsonl")
-        if classify_prompt is None:
-            # process answers
-            for x in all_res:
+            
+            if classify_prompt is None:
                 answer_prefix = ".*the answer is" if use_cot else "answer"
-                x.update(process_answer(x, answer_prefix=answer_prefix))
-        else:
-            for x in all_res:
-                extracted_number = re.findall("\\d+", llm_output_text(x["llm_output"]))
+                prompt.update(process_answer(prompt, answer_prefix=answer_prefix))
+            else:
+                extracted_number = re.findall("\\d+", llm_output_text(prompt["llm_output"]))
                 if extracted_number:
-                    x["output_number"] = int(extracted_number[0])
+                    prompt["output_number"] = int(extracted_number[0])
                 else:
-                    x["output_number"] = None
-        print(save_jsonl(file_name, all_res))
+                    prompt["output_number"] = None
+
+            all_res.append(prompt)
+            save_jsonl(file_name, all_res)
+
+        print(f"Finished. Saved {file_name}")
         if classify_prompt is None:
             print(basic_stats(all_res))
 

@@ -2,7 +2,7 @@
 
 
 <p align="center">
-<a href="https://arxiv.org/abs/2410.13648"><img src="https://img.shields.io/badge/arXiv-2410.13648-b31b1b.svg" alt="arXiv"></a>
+<a href="https://arxiv.org/abs/2410.13648"><img src="https://img.shields.io/badge/arXiv-SimpleToM paper-b31b1b.svg" alt="arXiv"></a>
 <a href="https://huggingface.co/datasets/allenai/SimpleToM"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-datasets/allenai/SimpleToM-blue" alt="Hugging Face"></a>
 </p>
 
@@ -103,13 +103,9 @@ Example commands
 ```commandline
 python inference/run_inference.py --models gpt-5-2025-08-07 --subset all --limit 2 --use-cot True
 ```
-If an output file for this command already exists in the output folder, the script will exit and you would see an error message like the following:
-```
-Error: output file already exists:
-  <Your_file_path>/SimpleToM/sample_outputs/inference_outputs/simpletom_stories_gpt-5-2025-08-07_subset_all_limit_2_cot_true.jsonl
-Use --output-tag to change the filename.
-```
-This behavior is intentional and prevents accidental overwriting of previously saved results. To save the output under a different name, provide the optional --output-tag argument with a tag of your choice, e.g.:
+If an output file for this command already exists in the output folder, the stored results will be loaded. This behavior is intentional and prevents accidental overwriting of previously saved results. We also store intermediate inference outputs, so that previously ran inference will be loaded and the inference running continues from there. 
+
+To save the output under a different name, provide the optional --output-tag argument with a tag of your choice, e.g.:
 
 ```commandline
  python inference/run_inference.py --models gpt-5-2025-08-07 --subset all --limit 2 --use-cot True --output-tag rerun1

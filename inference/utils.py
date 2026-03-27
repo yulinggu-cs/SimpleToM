@@ -3,7 +3,9 @@ import json
 import math
 
 OPENAI_REASONING_SUMMARY_MODELS_OPTIONS = \
-    {"gpt-5-2025-08-07": {'temperature': 1.0} # let model reason for as long as it wants, gpt-5 requires temp 1.0
+    {"gpt-5-2025-08-07": {'temperature': 1.0}, # let model reason for as long as it wants, gpt-5 requires temp 1.0
+    "gpt-5.2-2025-12-11": {'temperature': 1.0},
+    "gpt-5.4-2026-03-05": {'temperature': 1.0}
      }
 
 try:
@@ -111,14 +113,17 @@ def llm_complete(messages, model, options=None):
 def llm_output_text(response):
     if not isinstance(response, dict):
         response = response.model_dump()
-    if 'content' in response: # Anthropic
-        return response['content'][0]['text']
-    if 'output' in response: # OpenAI responses
-        # res = {"text:": response['output'][1]['content'][0]['text'], "reasoning_summary": response['output'][0]['summary']}
-        # print(res)
-        return response['output'][1]['content'][0]['text']
-    else:  # OpenAI and Together
-        return response['choices'][0]['message']['content']
+    try:
+        if 'content' in response: # Anthropic
+            return response['content'][0]['text']
+        if 'output' in response: # OpenAI responses
+            # res = {"text:": response['output'][1]['content'][0]['text'], "reasoning_summary": response['output'][0]['summary']}
+            # print(res)
+            return response['output'][1]['content'][0]['text']
+        else:  # OpenAI and Together
+            return response['choices'][0]['message']['content']
+    except (IndexError, KeyError, TypeError):
+        return ""
 
 
 def fill_template(template, fields):
